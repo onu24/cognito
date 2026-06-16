@@ -57,12 +57,14 @@ const strategicPartners = [
     role: "Websites, apps, e-commerce, CRM systems, and growth-focused digital tools.",
     accent: "#D9582A",
     points: ["Web Development", "Mobile Apps", "E-Commerce", "CRM Solutions"],
+    link: "https://wolfix-dev.vercel.app",
   },
   {
     name: "Cognitoo Agency",
     role: "Social media strategy, content production, campaign management, and brand growth.",
     accent: "#1E6FFF",
     points: ["Content Strategy", "Social Management", "Creative Production", "Growth Insights"],
+    link: null,
   },
 ];
 
@@ -444,6 +446,23 @@ export function HomePage() {
                       </div>
                     ))}
                   </div>
+                  {partner.link ? (
+                    <a
+                      href={partner.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-7 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105"
+                      style={{
+                        color: "#071326",
+                        background: partner.accent,
+                        boxShadow: `0 12px 28px ${partner.accent}35`,
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
+                      Meet Wolflix
+                      <ArrowRight size={15} />
+                    </a>
+                  ) : null}
                 </div>
               ))}
             </div>
