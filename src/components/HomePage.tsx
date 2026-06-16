@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { collection, onSnapshot, query } from "firebase/firestore";
-import { ArrowRight, Play, CheckCircle2, Zap, BarChart3, Clock, DollarSign, TrendingUp, Instagram, Film, Lightbulb, X, Check, ChevronRight } from "lucide-react";
+import { ArrowRight, Play, Zap, BarChart3, Clock, DollarSign, TrendingUp, Instagram, Film, Lightbulb, X, Check, ChevronRight } from "lucide-react";
 import { fallbackPortfolio, type PortfolioItem } from "@/lib/content";
 import { db } from "@/lib/firebase";
 import { routes } from "@/lib/routes";
@@ -54,16 +54,20 @@ const stats = [
 const strategicPartners = [
   {
     name: "Wolflix Dev",
+    label: "Build",
     role: "Websites, apps, e-commerce, CRM systems, and growth-focused digital tools.",
     accent: "#D9582A",
     points: ["Web Development", "Mobile Apps", "E-Commerce", "CRM Solutions"],
+    result: "Launch-ready digital products",
     link: "https://wolfix-dev.vercel.app",
   },
   {
     name: "Cognitoo Agency",
+    label: "Grow",
     role: "Social media strategy, content production, campaign management, and brand growth.",
     accent: "#1E6FFF",
     points: ["Content Strategy", "Social Management", "Creative Production", "Growth Insights"],
+    result: "Consistent audience growth",
     link: null,
   },
 ];
@@ -369,43 +373,105 @@ export function HomePage() {
       <section className="py-24 relative overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "linear-gradient(90deg, rgba(217,88,42,0.08), transparent 45%, rgba(30,111,255,0.08))" }}
+          style={{
+            background:
+              "radial-gradient(ellipse 55% 50% at 12% 18%, rgba(217,88,42,0.12) 0%, transparent 62%), radial-gradient(ellipse 55% 48% at 88% 78%, rgba(30,111,255,0.12) 0%, transparent 62%)",
+          }}
+        />
+        <div
+          className="absolute inset-x-0 top-1/2 h-px pointer-events-none"
+          style={{ background: "linear-gradient(90deg, transparent, rgba(217,88,42,0.34), rgba(30,111,255,0.34), transparent)" }}
         />
         <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
-          <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-10 items-stretch">
-            <div
-              className="rounded-2xl p-8 lg:p-10 flex flex-col justify-between"
+          <div className="max-w-3xl mb-12">
+            <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "#D9582A", fontFamily: "var(--font-heading)", letterSpacing: "0.15em" }}>
+              Strategic Partner
+            </p>
+            <h2
+              className="mb-5"
               style={{
-                background: "rgba(8,20,40,0.78)",
-                border: "1px solid rgba(217,88,42,0.22)",
+                fontFamily: "var(--font-heading)",
+                fontWeight: 800,
+                fontSize: "clamp(2rem, 4vw, 3.4rem)",
+                color: "#E8F0FF",
               }}
             >
-              <div>
-                <p className="text-xs uppercase mb-4" style={{ color: "#D9582A", fontFamily: "var(--font-heading)", fontWeight: 700 }}>
-                  Strategic Partner
-                </p>
-                <h2
-                  className="mb-5"
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontWeight: 800,
-                    fontSize: "clamp(2rem, 4vw, 3.3rem)",
-                    color: "#E8F0FF",
-                  }}
-                >
-                  Wolflix Dev x Cognitoo Agency
-                </h2>
-                <p className="text-base leading-relaxed max-w-xl" style={{ color: "#A8BFDE" }}>
-                  Wolflix builds the digital backbone - websites, apps, stores, and business tools - while Cognitoo drives the brand voice through content, campaigns, and social growth.
+              Wolflix builds the platform. Cognitoo builds the momentum.
+            </h2>
+            <p className="text-base leading-relaxed" style={{ color: "#A8BFDE" }}>
+              Together, we connect product, performance, and brand presence so businesses can launch stronger digital systems and grow them with content that keeps working.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-8 lg:gap-10 items-stretch">
+            <div
+              className="rounded-2xl p-7 lg:p-9 flex flex-col justify-between relative overflow-hidden"
+              style={{
+                background: "linear-gradient(145deg, rgba(8,20,40,0.92), rgba(8,20,40,0.64))",
+                border: "1px solid rgba(217,88,42,0.24)",
+                boxShadow: "0 28px 70px rgba(0,0,0,0.28)",
+              }}
+            >
+              <div
+                className="absolute -right-16 -top-16 w-48 h-48 rounded-full pointer-events-none"
+                style={{ background: "radial-gradient(circle, rgba(217,88,42,0.16), transparent 68%)" }}
+              />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-8">
+                  <span className="h-px flex-1" style={{ background: "rgba(217,88,42,0.3)" }} />
+                  <span className="text-xs uppercase" style={{ color: "#F5D8C8", fontFamily: "var(--font-heading)", fontWeight: 700 }}>
+                    Full-stack growth loop
+                  </span>
+                </div>
+
+                <div className="space-y-5">
+                  {["Digital Product", "Content Engine", "Growth Feedback"].map((step, index) => (
+                    <div key={step} className="flex items-center gap-4">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
+                        style={{
+                          color: index === 0 ? "#F5D8C8" : "#7AB8FF",
+                          background: index === 0 ? "rgba(217,88,42,0.14)" : "rgba(30,111,255,0.12)",
+                          border: `1px solid ${index === 0 ? "rgba(217,88,42,0.3)" : "rgba(30,111,255,0.28)"}`,
+                        }}
+                      >
+                        0{index + 1}
+                      </div>
+                      <div>
+                        <h3 className="text-base font-semibold text-white" style={{ fontFamily: "var(--font-heading)" }}>
+                          {step}
+                        </h3>
+                        <p className="text-sm mt-1" style={{ color: "#7A95B8" }}>
+                          {index === 0 ? "Websites, apps, and tools built to convert." : index === 1 ? "Campaigns and content shaped around the brand." : "Insights that refine what gets built and promoted next."}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-sm leading-relaxed mt-8 pt-6 border-t" style={{ color: "#A8BFDE", borderColor: "rgba(217,88,42,0.16)" }}>
+                  One side creates the digital infrastructure. The other turns that infrastructure into attention, trust, and measurable demand.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3 mt-8">
-                <span className="px-4 py-2 rounded-lg text-sm font-medium" style={{ color: "#F5D8C8", border: "1px solid rgba(217,88,42,0.35)", background: "rgba(217,88,42,0.12)" }}>
-                  Wolflix Dev
-                </span>
-                <span className="px-4 py-2 rounded-lg text-sm font-medium" style={{ color: "#7AB8FF", border: "1px solid rgba(30,111,255,0.35)", background: "rgba(30,111,255,0.1)" }}>
-                  Cognitoo Agency
-                </span>
+
+              <div className="grid grid-cols-2 gap-3 mt-8 relative">
+                {["Build", "Market"].map((item, index) => (
+                  <div
+                    key={item}
+                    className="rounded-xl p-4"
+                    style={{
+                      background: index === 0 ? "rgba(217,88,42,0.1)" : "rgba(30,111,255,0.1)",
+                      border: `1px solid ${index === 0 ? "rgba(217,88,42,0.24)" : "rgba(30,111,255,0.24)"}`,
+                    }}
+                  >
+                    <div className="text-xl font-bold" style={{ color: index === 0 ? "#F5D8C8" : "#7AB8FF", fontFamily: "var(--font-heading)" }}>
+                      {item}
+                    </div>
+                    <div className="text-xs mt-1" style={{ color: "#7A95B8" }}>
+                      {index === 0 ? "Wolflix Dev" : "Cognitoo Agency"}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -413,15 +479,22 @@ export function HomePage() {
               {strategicPartners.map((partner) => (
                 <div
                   key={partner.name}
-                  className="rounded-2xl p-7"
+                  className="rounded-2xl p-7 flex flex-col min-h-[360px] transition-all duration-300 hover:-translate-y-1"
                   style={{
-                    background: "rgba(8,20,40,0.7)",
+                    background: `linear-gradient(180deg, ${partner.accent}14, rgba(8,20,40,0.76) 36%)`,
                     border: `1px solid ${partner.accent}40`,
+                    boxShadow: `0 22px 52px ${partner.accent}12`,
                   }}
                 >
                   <div className="flex items-center justify-between gap-4 mb-5">
                     <div>
-                      <h3 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>
+                      <span
+                        className="inline-flex mb-3 px-3 py-1 rounded-full text-xs font-semibold"
+                        style={{ color: partner.accent, background: `${partner.accent}18`, border: `1px solid ${partner.accent}30` }}
+                      >
+                        {partner.label}
+                      </span>
+                      <h3 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>
                         {partner.name}
                       </h3>
                       <p className="text-xs mt-1" style={{ color: "#7A95B8" }}>
@@ -438,20 +511,36 @@ export function HomePage() {
                   <p className="text-sm leading-relaxed mb-6" style={{ color: "#A8BFDE" }}>
                     {partner.role}
                   </p>
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-3 mb-6">
                     {partner.points.map((point) => (
                       <div key={point} className="flex items-center gap-3 text-sm" style={{ color: "#7A95B8" }}>
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: partner.accent }} />
+                        <span
+                          className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                          style={{ background: partner.accent }}
+                        >
+                          <span
+                            className="block w-1.5 h-2.5 border-b-2 border-r-2 rotate-45"
+                            style={{ borderColor: "#071326" }}
+                          />
+                        </span>
                         {point}
                       </div>
                     ))}
+                  </div>
+                  <div className="mt-auto pt-5 border-t" style={{ borderColor: `${partner.accent}24` }}>
+                    <p className="text-xs uppercase mb-2" style={{ color: partner.accent, fontFamily: "var(--font-heading)", fontWeight: 700 }}>
+                      Outcome
+                    </p>
+                    <p className="text-sm font-medium" style={{ color: "#E8F0FF" }}>
+                      {partner.result}
+                    </p>
                   </div>
                   {partner.link ? (
                     <a
                       href={partner.link}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-7 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105"
+                      className="mt-6 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105"
                       style={{
                         color: "#071326",
                         background: partner.accent,
