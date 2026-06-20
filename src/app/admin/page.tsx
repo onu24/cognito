@@ -129,32 +129,37 @@ export default function AdminPage() {
   async function savePortfolio(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("");
-    const uploadedImage = portfolioFile ? await uploadImage(portfolioFile) : portfolioForm.img.trim();
-    if (!uploadedImage) {
-      setStatus("Please upload a portfolio image.");
-      return;
-    }
+    try {
+      const uploadedImage = portfolioFile ? await uploadImage(portfolioFile) : portfolioForm.img.trim();
+      if (!uploadedImage) {
+        setStatus("Please upload a portfolio image.");
+        return;
+      }
 
-    const payload = {
-      name: portfolioForm.name.trim(),
-      industry: portfolioForm.industry.trim(),
-      category: portfolioForm.category.trim(),
-      description: portfolioForm.description.trim(),
-      deliverables: tagsFromInput(portfolioForm.deliverables),
-      img: uploadedImage,
-      updatedAt: serverTimestamp(),
-    };
+      const payload = {
+        name: portfolioForm.name.trim(),
+        industry: portfolioForm.industry.trim(),
+        category: portfolioForm.category.trim(),
+        description: portfolioForm.description.trim(),
+        deliverables: tagsFromInput(portfolioForm.deliverables),
+        img: uploadedImage,
+        updatedAt: serverTimestamp(),
+      };
 
-    if (editingPortfolioId) {
-      await updateDoc(doc(db, "portfolio", editingPortfolioId), payload);
-      setStatus("Portfolio card updated.");
-    } else {
-      await addDoc(collection(db, "portfolio"), { ...payload, createdAt: serverTimestamp() });
-      setStatus("Portfolio card added.");
+      if (editingPortfolioId) {
+        await updateDoc(doc(db, "portfolio", editingPortfolioId), payload);
+        setStatus("Portfolio card updated.");
+      } else {
+        await addDoc(collection(db, "portfolio"), { ...payload, createdAt: serverTimestamp() });
+        setStatus("Portfolio card added.");
+      }
+      setPortfolioForm(emptyPortfolio);
+      setPortfolioFile(null);
+      setEditingPortfolioId(null);
+    } catch (error: any) {
+      console.error("Error saving portfolio:", error);
+      setStatus(error.message || "An error occurred while saving portfolio card.");
     }
-    setPortfolioForm(emptyPortfolio);
-    setPortfolioFile(null);
-    setEditingPortfolioId(null);
   }
 
   function editPortfolio(item: PortfolioItem) {
@@ -174,28 +179,33 @@ export default function AdminPage() {
   async function saveClient(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("");
-    const uploadedImage = clientFile ? await uploadImage(clientFile) : clientForm.img.trim();
-    const payload = {
-      name: clientForm.name.trim(),
-      desc: clientForm.desc.trim(),
-      type: clientForm.type.trim(),
-      img: uploadedImage,
-      summary: clientForm.summary.trim(),
-      services: tagsFromInput(clientForm.services),
-      featured: clientForm.featured,
-      updatedAt: serverTimestamp(),
-    };
+    try {
+      const uploadedImage = clientFile ? await uploadImage(clientFile) : clientForm.img.trim();
+      const payload = {
+        name: clientForm.name.trim(),
+        desc: clientForm.desc.trim(),
+        type: clientForm.type.trim(),
+        img: uploadedImage,
+        summary: clientForm.summary.trim(),
+        services: tagsFromInput(clientForm.services),
+        featured: clientForm.featured,
+        updatedAt: serverTimestamp(),
+      };
 
-    if (editingClientId) {
-      await updateDoc(doc(db, "clients", editingClientId), payload);
-      setStatus("Client updated.");
-    } else {
-      await addDoc(collection(db, "clients"), { ...payload, createdAt: serverTimestamp() });
-      setStatus("Client added.");
+      if (editingClientId) {
+        await updateDoc(doc(db, "clients", editingClientId), payload);
+        setStatus("Client updated.");
+      } else {
+        await addDoc(collection(db, "clients"), { ...payload, createdAt: serverTimestamp() });
+        setStatus("Client added.");
+      }
+      setClientForm(emptyClient);
+      setClientFile(null);
+      setEditingClientId(null);
+    } catch (error: any) {
+      console.error("Error saving client:", error);
+      setStatus(error.message || "An error occurred while saving client.");
     }
-    setClientForm(emptyClient);
-    setClientFile(null);
-    setEditingClientId(null);
   }
 
   function editClient(client: ClientItem) {
@@ -254,6 +264,9 @@ export default function AdminPage() {
       await signOut(secondaryAuth);
       setAdminForm({ name: "", email: "", password: "" });
       setStatus("Admin user created.");
+    } catch (error: any) {
+      console.error("Error creating admin:", error);
+      setStatus(error.message || "An error occurred while creating admin user.");
     } finally {
       await deleteApp(secondaryApp).catch(() => undefined);
     }
