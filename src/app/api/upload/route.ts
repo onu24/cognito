@@ -1,7 +1,7 @@
-import { mkdir, writeFile } from "fs/promises";
-import { join } from "path";
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
+import { storage } from "@/lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export const runtime = "nodejs";
 
@@ -31,16 +31,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Image must be 5MB or smaller." }, { status: 400 });
     }
 
-    const uploadsDir = join(process.cwd(), "public", "uploads");
-    await mkdir(uploadsDir, { recursive: true });
-
     const filename = `${Date.now()}-${randomUUID()}.${extension}`;
-    const bytes = await file.arrayBuffer();
-    await writeFile(join(uploadsDir, filename), Buffer.from(bytes));
+    const storageRef = ref(storage, `uploads/${filename}`);
 
-    return NextResponse.json({ path: `/uploads/${filename}` });
+    const bytes = await file.arrayBuffer();
+    const buffer = new Uint8Array(bytes);
+
+    const snapshot = await uploadBytes(storageRef, buffer, {
+      contentType: file.type,
+    });
+
+    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    return NextResponse.json({ path: downloadURL });
   } catch (error: any) {
     console.error("Error in upload API route:", error);
-    return NextResponse.json({ error: error.message || "Failed to process/write file." }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Failed to process/upload file." }, { status: 500 });
   }
 }
