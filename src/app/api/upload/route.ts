@@ -13,29 +13,34 @@ const allowedTypes = new Map([
 ]);
 
 export async function POST(request: Request) {
-  const formData = await request.formData();
-  const file = formData.get("file");
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file");
 
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "No image file provided." }, { status: 400 });
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "No image file provided." }, { status: 400 });
+    }
+
+    const extension = allowedTypes.get(file.type);
+    if (!extension) {
+      return NextResponse.json({ error: "Only JPG, PNG, WebP, and GIF images are allowed." }, { status: 400 });
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return NextResponse.json({ error: "Image must be 5MB or smaller." }, { status: 400 });
+    }
+
+    const uploadsDir = join(process.cwd(), "public", "uploads");
+    await mkdir(uploadsDir, { recursive: true });
+
+    const filename = `${Date.now()}-${randomUUID()}.${extension}`;
+    const bytes = await file.arrayBuffer();
+    await writeFile(join(uploadsDir, filename), Buffer.from(bytes));
+
+    return NextResponse.json({ path: `/uploads/${filename}` });
+  } catch (error: any) {
+    console.error("Error in upload API route:", error);
+    return NextResponse.json({ error: error.message || "Failed to process/write file." }, { status: 500 });
   }
-
-  const extension = allowedTypes.get(file.type);
-  if (!extension) {
-    return NextResponse.json({ error: "Only JPG, PNG, WebP, and GIF images are allowed." }, { status: 400 });
-  }
-
-  const maxSize = 5 * 1024 * 1024;
-  if (file.size > maxSize) {
-    return NextResponse.json({ error: "Image must be 5MB or smaller." }, { status: 400 });
-  }
-
-  const uploadsDir = join(process.cwd(), "public", "uploads");
-  await mkdir(uploadsDir, { recursive: true });
-
-  const filename = `${Date.now()}-${randomUUID()}.${extension}`;
-  const bytes = await file.arrayBuffer();
-  await writeFile(join(uploadsDir, filename), Buffer.from(bytes));
-
-  return NextResponse.json({ path: `/uploads/${filename}` });
 }
