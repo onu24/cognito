@@ -2,6 +2,7 @@ import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 export const firebaseConfig = {
   apiKey: "AIzaSyBdtV4it7E5ovMcJPgZSHS_VsLbZieDrIg",
@@ -16,6 +17,7 @@ export const firebaseConfig = {
 export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 export async function loadAnalytics(): Promise<Analytics | null> {
   if (typeof window === "undefined") return null;

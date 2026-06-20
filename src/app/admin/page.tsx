@@ -8,7 +8,8 @@ import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signOut, t
 import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { BriefcaseBusiness, Building2, ImagePlus, Inbox, LogOut, Mail, Plus, Save, ShieldCheck, Trash2, UserPlus } from "lucide-react";
 import { ClientItem, ContactMessage, PortfolioItem, tagsFromInput, tagsToInput } from "@/lib/content";
-import { auth, db, firebaseConfig } from "@/lib/firebase";
+import { auth, db, firebaseConfig, storage } from "@/lib/firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 type AdminRecord = {
   id: string;
@@ -224,29 +225,13 @@ export default function AdminPage() {
   }
 
   async function uploadImage(file: File) {
-    const formData = new FormData();
-    formData.append("file", file);
+    const extension = file.type.split("/")[1] || "png";
+    const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}.${extension}`;
+    const storageRef = ref(storage, `uploads/${filename}`);
 
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const text = await response.text();
-    let result: { path?: string; error?: string } = {};
-    try {
-      if (text.trim()) {
-        result = JSON.parse(text);
-      }
-    } catch (e) {
-      throw new Error(`Server returned non-JSON response (Status: ${response.status}). Details: ${text.substring(0, 100)}`);
-    }
-
-    if (!response.ok || !result.path) {
-      throw new Error(result.error ?? `Image upload failed (Status: ${response.status}).`);
-    }
-
-    return result.path;
+    const snapshot = await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
   }
 
   async function createAdmin(event: FormEvent<HTMLFormElement>) {
