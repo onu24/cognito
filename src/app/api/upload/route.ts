@@ -10,7 +10,7 @@ const allowedTypes = new Map([
   ["image/gif", "gif"],
 ]);
 
-const bucket = "cognito-inc-54999.firebasestorage.app";
+const bucket = "cognito-inc-54999.appspot.com";
 
 export async function POST(request: Request) {
   try {
