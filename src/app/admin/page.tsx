@@ -228,8 +228,14 @@ export default function AdminPage() {
     const formData = new FormData();
     formData.append("file", file);
 
+    const currentUser = auth.currentUser;
+    const token = currentUser ? await currentUser.getIdToken() : "";
+
     const response = await fetch("/api/upload", {
       method: "POST",
+      headers: {
+        Authorization: token ? `Bearer ${token}` : "",
+      },
       body: formData,
     });
 

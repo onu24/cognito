@@ -1,7 +1,5 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
-import { storage } from "@/lib/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export const runtime = "nodejs";
 
@@ -12,8 +10,13 @@ const allowedTypes = new Map([
   ["image/gif", "gif"],
 ]);
 
+const bucket = "cognito-inc-54999.firebasestorage.app";
+
 export async function POST(request: Request) {
   try {
+    const authHeader = request.headers.get("Authorization") || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : "";
+
     const formData = await request.formData();
     const file = formData.get("file");
 
@@ -32,16 +35,42 @@ export async function POST(request: Request) {
     }
 
     const filename = `${Date.now()}-${randomUUID()}.${extension}`;
-    const storageRef = ref(storage, `uploads/${filename}`);
+    const path = `uploads/${filename}`;
 
     const bytes = await file.arrayBuffer();
-    const buffer = new Uint8Array(bytes);
+    const buffer = Buffer.from(bytes);
 
-    const snapshot = await uploadBytes(storageRef, buffer, {
-      contentType: file.type,
+    const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o?name=${encodeURIComponent(path)}`;
+
+    const headers: HeadersInit = {
+      "Content-Type": file.type,
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const storageResponse = await fetch(uploadUrl, {
+      method: "POST",
+      headers,
+      body: buffer,
     });
 
-    const downloadURL = await getDownloadURL(snapshot.ref);
+    const text = await storageResponse.text();
+    let resData: any = {};
+    try {
+      if (text.trim()) {
+        resData = JSON.parse(text);
+      }
+    } catch (e) {
+      throw new Error(`Firebase API returned non-JSON response (Status: ${storageResponse.status}). Details: ${text.substring(0, 100)}`);
+    }
+
+    if (!storageResponse.ok) {
+      throw new Error(resData.error?.message || `Firebase Storage rejected upload with status ${storageResponse.status}`);
+    }
+
+    const downloadToken = resData.downloadTokens;
+    const downloadURL = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media${downloadToken ? `&token=${downloadToken}` : ""}`;
 
     return NextResponse.json({ path: downloadURL });
   } catch (error: any) {
