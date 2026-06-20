@@ -231,10 +231,19 @@ export default function AdminPage() {
       method: "POST",
       body: formData,
     });
-    const result = (await response.json()) as { path?: string; error?: string };
+
+    const text = await response.text();
+    let result: { path?: string; error?: string } = {};
+    try {
+      if (text.trim()) {
+        result = JSON.parse(text);
+      }
+    } catch (e) {
+      throw new Error(`Server returned non-JSON response (Status: ${response.status}). Details: ${text.substring(0, 100)}`);
+    }
 
     if (!response.ok || !result.path) {
-      throw new Error(result.error ?? "Image upload failed.");
+      throw new Error(result.error ?? `Image upload failed (Status: ${response.status}).`);
     }
 
     return result.path;
