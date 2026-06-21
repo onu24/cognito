@@ -44,6 +44,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"portfolio" | "clients" | "messages" | "admins">("portfolio");
   const [status, setStatus] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [portfolioForm, setPortfolioForm] = useState(emptyPortfolio);
@@ -225,35 +226,40 @@ export default function AdminPage() {
   }
 
   async function uploadImage(file: File) {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const currentUser = auth.currentUser;
-    const token = currentUser ? await currentUser.getIdToken() : "";
-
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      headers: {
-        Authorization: token ? `Bearer ${token}` : "",
-      },
-      body: formData,
-    });
-
-    const text = await response.text();
-    let result: { path?: string; error?: string } = {};
+    setIsUploading(true);
     try {
-      if (text.trim()) {
-        result = JSON.parse(text);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const currentUser = auth.currentUser;
+      const token = currentUser ? await currentUser.getIdToken() : "";
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: formData,
+      });
+
+      const text = await response.text();
+      let result: { path?: string; error?: string } = {};
+      try {
+        if (text.trim()) {
+          result = JSON.parse(text);
+        }
+      } catch (e) {
+        throw new Error(`Server returned non-JSON response (Status: ${response.status}). Details: ${text.substring(0, 100)}`);
       }
-    } catch (e) {
-      throw new Error(`Server returned non-JSON response (Status: ${response.status}). Details: ${text.substring(0, 100)}`);
-    }
 
-    if (!response.ok || !result.path) {
-      throw new Error(result.error ?? `Image upload failed (Status: ${response.status}).`);
-    }
+      if (!response.ok || !result.path) {
+        throw new Error(result.error ?? `Image upload failed (Status: ${response.status}).`);
+      }
 
-    return result.path;
+      return result.path;
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   async function createAdmin(event: FormEvent<HTMLFormElement>) {
@@ -395,11 +401,11 @@ export default function AdminPage() {
                 <Input label="Category" value={portfolioForm.category} onChange={(value) => setPortfolioForm({ ...portfolioForm, category: value })} required />
                 <Textarea label="Description" value={portfolioForm.description} onChange={(value) => setPortfolioForm({ ...portfolioForm, description: value })} required />
                 <Input label="Deliverables, comma separated" value={portfolioForm.deliverables} onChange={(value) => setPortfolioForm({ ...portfolioForm, deliverables: value })} required />
-                <FileInput label="Portfolio image" required={!editingPortfolioId && !portfolioForm.img} onChange={setPortfolioFile} />
+                <FileInput label="Portfolio image" required={!editingPortfolioId && !portfolioForm.img} onChange={setPortfolioFile} disabled={isUploading} />
                 {portfolioForm.img && (
                   <ImagePreview src={portfolioForm.img} label="Current portfolio image" />
                 )}
-                <FormActions onCancel={() => { setPortfolioForm(emptyPortfolio); setPortfolioFile(null); setEditingPortfolioId(null); }} editing={Boolean(editingPortfolioId)} />
+                <FormActions onCancel={() => { setPortfolioForm(emptyPortfolio); setPortfolioFile(null); setEditingPortfolioId(null); }} editing={Boolean(editingPortfolioId)} loading={isUploading} />
               </form>
             </Panel>
 
@@ -421,7 +427,7 @@ export default function AdminPage() {
                 <Input label="Client name" value={clientForm.name} onChange={(value) => setClientForm({ ...clientForm, name: value })} required />
                 <Input label="Short descriptor" value={clientForm.desc} onChange={(value) => setClientForm({ ...clientForm, desc: value })} required />
                 <Input label="Client type" value={clientForm.type} onChange={(value) => setClientForm({ ...clientForm, type: value })} required />
-                <FileInput label="Client image, optional" onChange={setClientFile} />
+                <FileInput label="Client image, optional" onChange={setClientFile} disabled={isUploading} />
                 {clientForm.img && (
                   <ImagePreview src={clientForm.img} label="Current client image" />
                 )}
@@ -431,7 +437,7 @@ export default function AdminPage() {
                   <input type="checkbox" checked={clientForm.featured} onChange={(event) => setClientForm({ ...clientForm, featured: event.target.checked })} />
                   Feature this client
                 </label>
-                <FormActions onCancel={() => { setClientForm(emptyClient); setClientFile(null); setEditingClientId(null); }} editing={Boolean(editingClientId)} />
+                <FormActions onCancel={() => { setClientForm(emptyClient); setClientFile(null); setEditingClientId(null); }} editing={Boolean(editingClientId)} loading={isUploading} />
               </form>
             </Panel>
 
@@ -534,11 +540,11 @@ function Textarea({ label, value, onChange, required }: { label: string; value: 
   );
 }
 
-function FileInput({ label, onChange, required }: { label: string; onChange: (file: File | null) => void; required?: boolean }) {
+function FileInput({ label, onChange, required, disabled }: { label: string; onChange: (file: File | null) => void; required?: boolean; disabled?: boolean }) {
   return (
     <label className="block">
       <span className="text-sm text-[#E8F0FF]">{label}</span>
-      <div className="mt-2 rounded-md border border-dashed border-[rgba(30,111,255,0.28)] bg-[#0D1E3A] px-3 py-4">
+      <div className={`mt-2 rounded-md border border-dashed border-[rgba(30,111,255,0.28)] bg-[#0D1E3A] px-3 py-4 ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-md bg-[rgba(30,111,255,0.14)] flex items-center justify-center text-[#00C6FF]">
             <ImagePlus size={18} />
@@ -547,8 +553,9 @@ function FileInput({ label, onChange, required }: { label: string; onChange: (fi
             type="file"
             accept="image/png,image/jpeg,image/webp,image/gif"
             required={required}
+            disabled={disabled}
             onChange={(event) => onChange(event.target.files?.[0] ?? null)}
-            className="block w-full text-sm text-[#A8BFDE] file:mr-4 file:h-9 file:rounded-md file:border-0 file:bg-[#1E6FFF] file:px-4 file:text-sm file:font-semibold file:text-white hover:file:bg-[#2979FF]"
+            className="block w-full text-sm text-[#A8BFDE] file:mr-4 file:h-9 file:rounded-md file:border-0 file:bg-[#1E6FFF] file:px-4 file:text-sm file:font-semibold file:text-white hover:file:bg-[#2979FF] disabled:pointer-events-none"
           />
         </div>
         <p className="mt-2 text-xs text-[#7A95B8]">JPG, PNG, WebP, or GIF. Max 5MB.</p>
@@ -568,15 +575,33 @@ function ImagePreview({ src, label }: { src: string; label: string }) {
   );
 }
 
-function FormActions({ editing, onCancel }: { editing: boolean; onCancel: () => void }) {
+function FormActions({ editing, onCancel, loading }: { editing: boolean; onCancel: () => void; loading?: boolean }) {
   return (
     <div className="flex gap-3">
-      <button type="submit" className="h-11 flex-1 rounded-md bg-[#1E6FFF] text-sm font-semibold text-white flex items-center justify-center gap-2 hover:bg-[#2979FF]">
-        <Save size={16} />
-        {editing ? "Save changes" : "Add item"}
+      <button 
+        type="submit" 
+        disabled={loading}
+        className="h-11 flex-1 rounded-md bg-[#1E6FFF] text-sm font-semibold text-white flex items-center justify-center gap-2 hover:bg-[#2979FF] disabled:bg-[#1E6FFF]/50 disabled:cursor-not-allowed"
+      >
+        {loading ? (
+          <>
+            <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+            Uploading image...
+          </>
+        ) : (
+          <>
+            <Save size={16} />
+            {editing ? "Save changes" : "Add item"}
+          </>
+        )}
       </button>
       {editing && (
-        <button type="button" onClick={onCancel} className="h-11 px-4 rounded-md border border-[rgba(30,111,255,0.2)] text-sm text-[#A8BFDE] hover:bg-[#0D1E3A]">
+        <button 
+          type="button" 
+          onClick={onCancel} 
+          disabled={loading}
+          className="h-11 px-4 rounded-md border border-[rgba(30,111,255,0.2)] text-sm text-[#A8BFDE] hover:bg-[#0D1E3A] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Cancel
         </button>
       )}
