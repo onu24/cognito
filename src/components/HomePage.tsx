@@ -7,6 +7,8 @@ import { ArrowRight, Play, Zap, BarChart3, Clock, DollarSign, TrendingUp, Instag
 import { fallbackPortfolio, type PortfolioItem } from "@/lib/content";
 import { db } from "@/lib/firebase";
 import { routes } from "@/lib/routes";
+import { CloudinaryImage } from "@/components/ui/CloudinaryImage";
+
 
 const taglines = [
   "Intelligence That Markets",
@@ -745,9 +747,11 @@ export function HomePage() {
                 }}
               >
                 <div className="relative h-48 overflow-hidden" style={{ background: "#0D1E3A" }}>
-                  <img
+                  <CloudinaryImage
                     src={project.img}
                     alt={project.name}
+                    width={500}
+                    height={500}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div

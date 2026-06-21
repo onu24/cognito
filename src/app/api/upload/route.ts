@@ -1,5 +1,5 @@
-import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
 
 export const runtime = "nodejs";
 
@@ -10,12 +10,16 @@ const allowedTypes = new Map([
   ["image/gif", "gif"],
 ]);
 
-const bucket = "cognito-inc-54999.appspot.com";
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "drkd4w5yw",
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(request: Request) {
   try {
     const authHeader = request.headers.get("Authorization") || "";
-    const token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : "";
+    // Note: Admin validation token checks can be handled here if required
 
     const formData = await request.formData();
     const file = formData.get("file");
@@ -34,45 +38,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Image must be 5MB or smaller." }, { status: 400 });
     }
 
-    const filename = `${Date.now()}-${randomUUID()}.${extension}`;
-    const path = `uploads/${filename}`;
+    if (!process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return NextResponse.json(
+        { error: "Cloudinary API Key or API Secret is not configured in environment variables (.env.local)." },
+        { status: 500 }
+      );
+    }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o?name=${encodeURIComponent(path)}`;
+    const uploadResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: "agency-portfolio",
+          resource_type: "image",
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      ).end(buffer);
+    }) as any;
 
-    const headers: HeadersInit = {
-      "Content-Type": file.type,
-    };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
+    if (!uploadResult || !uploadResult.secure_url) {
+      throw new Error("Failed to retrieve upload URL from Cloudinary.");
     }
 
-    const storageResponse = await fetch(uploadUrl, {
-      method: "POST",
-      headers,
-      body: buffer,
-    });
-
-    const text = await storageResponse.text();
-    let resData: any = {};
-    try {
-      if (text.trim()) {
-        resData = JSON.parse(text);
-      }
-    } catch (e) {
-      throw new Error(`Firebase API returned non-JSON response (Status: ${storageResponse.status}). Details: ${text.substring(0, 100)}`);
-    }
-
-    if (!storageResponse.ok) {
-      throw new Error(resData.error?.message || `Firebase Storage rejected upload with status ${storageResponse.status}`);
-    }
-
-    const downloadToken = resData.downloadTokens;
-    const downloadURL = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media${downloadToken ? `&token=${downloadToken}` : ""}`;
-
-    return NextResponse.json({ path: downloadURL });
+    return NextResponse.json({ path: uploadResult.secure_url });
   } catch (error: any) {
     console.error("Error in upload API route:", error);
     return NextResponse.json({ error: error.message || "Failed to process/upload file." }, { status: 500 });

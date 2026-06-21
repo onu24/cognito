@@ -7,6 +7,8 @@ import { ArrowRight } from "lucide-react";
 import { fallbackPortfolio, type PortfolioItem } from "@/lib/content";
 import { db } from "@/lib/firebase";
 import { routes } from "@/lib/routes";
+import { CloudinaryImage } from "@/components/ui/CloudinaryImage";
+
 
 export function PortfolioPage() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -98,7 +100,7 @@ export function PortfolioPage() {
                 onClick={() => setSelectedProject(project)}
               >
                 <div className="relative h-56 overflow-hidden" style={{ background: "#0D1E3A" }}>
-                  <img src={project.img} alt={project.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <CloudinaryImage src={project.img} alt={project.name} width={700} height={500} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(4,12,26,0.75), transparent)" }} />
                   <span
                     className="absolute top-3 left-3 text-xs px-3 py-1.5 rounded-full"
@@ -150,7 +152,7 @@ export function PortfolioPage() {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="relative h-56" style={{ background: "#0D1E3A" }}>
-              <img src={selectedProject.img} alt={selectedProject.name} className="w-full h-full object-cover" />
+              <CloudinaryImage src={selectedProject.img} alt={selectedProject.name} width={700} height={500} className="w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,20,40,0.9), transparent 50%)" }} />
               <button
                 onClick={() => setSelectedProject(null)}

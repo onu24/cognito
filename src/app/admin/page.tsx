@@ -8,8 +8,8 @@ import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signOut, t
 import { addDoc, collection, deleteDoc, doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { BriefcaseBusiness, Building2, ImagePlus, Inbox, LogOut, Mail, Plus, Save, ShieldCheck, Trash2, UserPlus } from "lucide-react";
 import { ClientItem, ContactMessage, PortfolioItem, tagsFromInput, tagsToInput } from "@/lib/content";
-import { auth, db, firebaseConfig, storage } from "@/lib/firebase";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { auth, db, firebaseConfig } from "@/lib/firebase";
+import { CloudinaryImage } from "@/components/ui/CloudinaryImage";
 
 type AdminRecord = {
   id: string;
@@ -562,7 +562,7 @@ function ImagePreview({ src, label }: { src: string; label: string }) {
     <div>
       <p className="mb-2 text-sm text-[#E8F0FF]">{label}</p>
       <div className="h-32 overflow-hidden rounded-md border border-[rgba(30,111,255,0.2)] bg-[#0D1E3A]">
-        <img src={src} alt={label} className="h-full w-full object-cover" />
+        <CloudinaryImage src={src} alt={label} width={300} height={200} className="h-full w-full object-cover" />
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ import { ArrowRight, Building2 } from "lucide-react";
 import { fallbackClients, type ClientItem } from "@/lib/content";
 import { db } from "@/lib/firebase";
 import { routes } from "@/lib/routes";
+import { CloudinaryImage } from "@/components/ui/CloudinaryImage";
+
 
 export function ClientsPage() {
   const [clients, setClients] = useState<ClientItem[]>(fallbackClients);
@@ -68,7 +70,7 @@ export function ClientsPage() {
               <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
                 {featuredClient.img ? (
                   <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0" style={{ border: "1px solid rgba(30,111,255,0.25)" }}>
-                    <img src={featuredClient.img} alt={featuredClient.name} className="w-full h-full object-cover" />
+                    <CloudinaryImage src={featuredClient.img} alt={featuredClient.name} width={200} height={200} className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div
@@ -129,7 +131,7 @@ export function ClientsPage() {
               >
                 {client.img ? (
                   <div className="w-14 h-14 rounded-lg overflow-hidden mb-1" style={{ border: "1px solid rgba(30,111,255,0.2)" }}>
-                    <img src={client.img} alt={client.name} className="w-full h-full object-cover" />
+                    <CloudinaryImage src={client.img} alt={client.name} width={150} height={150} className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-1" style={{ background: "rgba(30,111,255,0.08)" }}>
