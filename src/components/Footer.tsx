@@ -28,19 +28,12 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-16 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-14">
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-3 mb-5">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, #1E6FFF, #00C6FF)",
-                  boxShadow: "0 0 16px rgba(30, 111, 255, 0.35)",
-                }}
-              >
-                <span className="text-white font-bold text-base" style={{ fontFamily: "var(--font-heading)" }}>C</span>
-              </div>
-              <span className="text-white text-lg" style={{ fontFamily: "var(--font-heading)", fontWeight: 700 }}>
-                Cognitoo<span style={{ color: "#1E6FFF" }}>.inc</span>
-              </span>
+            <div className="flex items-center mb-5">
+              <img
+                src="/logo.png"
+                alt="Cognitoo.inc Logo"
+                className="h-18 w-auto object-contain"
+              />
             </div>
             <p className="text-sm leading-relaxed mb-6" style={{ color: "#7A95B8", fontFamily: "var(--font-body)" }}>
               AI-powered marketing for brands that want to grow smarter. We combine creativity, strategy, and technology to build lasting digital presence.

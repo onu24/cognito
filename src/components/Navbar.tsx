@@ -45,31 +45,13 @@ export function Navbar() {
             <Link
               href={routes.home}
               onClick={closeMobile}
-              className="flex items-center gap-3 group"
+              className="flex items-center group"
             >
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center relative overflow-hidden"
-                style={{
-                  background: "linear-gradient(135deg, #1E6FFF, #00C6FF)",
-                  boxShadow: "0 0 20px rgba(30, 111, 255, 0.4)",
-                }}
-              >
-                <span
-                  className="text-white text-lg select-none"
-                  style={{ fontFamily: "var(--font-heading)", fontWeight: 800 }}
-                >
-                  C
-                </span>
-              </div>
-              <div className="flex flex-col leading-none">
-                <span
-                  className="text-white text-lg tracking-wide"
-                  style={{ fontFamily: "var(--font-heading)", fontWeight: 700 }}
-                >
-                  Cognitoo
-                  <span style={{ color: "#1E6FFF" }}>.inc</span>
-                </span>
-              </div>
+              <img
+                src="/logo.png"
+                alt="Cognitoo.inc Logo"
+                className="h-18 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              />
             </Link>
 
             <div className="hidden md:flex items-center gap-8">
