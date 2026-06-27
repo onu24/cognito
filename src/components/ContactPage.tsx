@@ -176,7 +176,7 @@ export function ContactPage() {
                     </div>
                     <div>
                       <p className="text-xs mb-1" style={{ color: "#7A95B8" }}>Email</p>
-                      <p className="text-sm text-white">your-email@example.com</p>
+                      <p className="text-sm text-white">Team.cognitoo.inc@gmail.com</p>
                     </div>
                   </div>
 
@@ -311,7 +311,7 @@ export function ContactPage() {
                       <input
                         type="email"
                         required
-                        placeholder="you@company.com"
+                        placeholder="Team.cognitoo.inc@gmail.com"
                         value={form.email}
                         onChange={(e) => handleChange("email", e.target.value)}
                         style={inputStyle}
